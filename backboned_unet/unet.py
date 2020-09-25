@@ -4,7 +4,7 @@ from torchvision import models, datasets, transforms
 from torch.nn import functional as F
 
 
-def get_backbone(name, pretrained=True):
+def get_backbone(name, pretrained=True, replace_stride_with_dilation=[False, False, False]):
 
     """ Loading backbone, defining names for skip-connections and encoder output. """
 
@@ -12,15 +12,15 @@ def get_backbone(name, pretrained=True):
 
     # loading backbone model
     if name == 'resnet18':
-        backbone = models.resnet18(pretrained=pretrained)
+        backbone = models.resnet18(pretrained=pretrained, replace_stride_with_dilation=replace_stride_with_dilation)
     elif name == 'resnet34':
-        backbone = models.resnet34(pretrained=pretrained)
+        backbone = models.resnet34(pretrained=pretrained, replace_stride_with_dilation=replace_stride_with_dilation)
     elif name == 'resnet50':
-        backbone = models.resnet50(pretrained=pretrained)
+        backbone = models.resnet50(pretrained=pretrained, replace_stride_with_dilation=replace_stride_with_dilation)
     elif name == 'resnet101':
-        backbone = models.resnet101(pretrained=pretrained)
+        backbone = models.resnet101(pretrained=pretrained, replace_stride_with_dilation=replace_stride_with_dilation)
     elif name == 'resnet152':
-        backbone = models.resnet152(pretrained=pretrained)
+        backbone = models.resnet152(pretrained=pretrained, replace_stride_with_dilation=replace_stride_with_dilation)
     elif name == 'vgg16':
         backbone = models.vgg16_bn(pretrained=pretrained).features
     elif name == 'vgg19':
@@ -133,12 +133,13 @@ class Unet(nn.Module):
                  decoder_filters=(256, 128, 64, 32, 16),
                  parametric_upsampling=True,
                  shortcut_features='default',
-                 decoder_use_batchnorm=True):
+                 decoder_use_batchnorm=True,
+                 replace_stride_with_dilation=[False, False, False]):
         super(Unet, self).__init__()
 
         self.backbone_name = backbone_name
 
-        self.backbone, self.shortcut_features, self.bb_out_name = get_backbone(backbone_name, pretrained=pretrained)
+        self.backbone, self.shortcut_features, self.bb_out_name = get_backbone(backbone_name, pretrained=pretrained, replace_stride_with_dilation=replace_stride_with_dilation)
         shortcut_chs, bb_out_chs = self.infer_skip_channels()
         if shortcut_features != 'default':
             self.shortcut_features = shortcut_features
